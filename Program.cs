@@ -1,5 +1,6 @@
 using System.Text;
 using ApiEcommerce.Constants;
+using ApiEcommerce.Data;
 using ApiEcommerce.Models;
 using ApiEcommerce.Repository;
 using ApiEcommerce.Repository.IRepository;
@@ -15,7 +16,14 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 var dbConnectionString = builder.Configuration.GetConnectionString("ConexionSql");
-builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(dbConnectionString));
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+  options.UseSqlServer(dbConnectionString)
+  .UseSeeding((context, _) =>
+  {
+    var appContext = (ApplicationDbContext)context;
+    DataSeeder.SeedData(appContext);
+  })
+);
 
 builder.Services.AddResponseCaching(options =>
 {
@@ -28,7 +36,7 @@ builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddAutoMapper(cfg => cfg.AddMaps(typeof(Program).Assembly));
 
-builder.Services.AddIdentity<ApplicationUser,IdentityRole>()
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
 .AddEntityFrameworkStores<ApplicationDbContext>()
 .AddDefaultTokenProviders();
 
@@ -94,8 +102,8 @@ builder.Services.AddSwaggerGen(
         new List<string>()
       }
     });
-  
-    options.SwaggerDoc("v1",new OpenApiInfo
+
+    options.SwaggerDoc("v1", new OpenApiInfo
     {
       Version = "v1",
       Title = "API Ecommerce",
@@ -113,7 +121,7 @@ builder.Services.AddSwaggerGen(
       }
     });
 
-    options.SwaggerDoc("v2",new OpenApiInfo
+    options.SwaggerDoc("v2", new OpenApiInfo
     {
       Version = "v2",
       Title = "API Ecommerce",
@@ -136,7 +144,7 @@ builder.Services.AddSwaggerGen(
 var apiVersioningbuilder = builder.Services.AddApiVersioning(option =>
 {
   option.AssumeDefaultVersionWhenUnspecified = true;
-  option.DefaultApiVersion = new ApiVersion(1,0);
+  option.DefaultApiVersion = new ApiVersion(1, 0);
   option.ReportApiVersions = true;
   // option.ApiVersionReader = ApiVersionReader.Combine( new QueryStringApiVersionReader("api-version")); //?api-version
 });
@@ -168,8 +176,8 @@ if (app.Environment.IsDevelopment())
   app.UseSwagger();
   app.UseSwaggerUI(options =>
   {
-    options.SwaggerEndpoint("/swagger/v1/swagger.json","v1");
-    options.SwaggerEndpoint("/swagger/v2/swagger.json","v2");
+    options.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
+    options.SwaggerEndpoint("/swagger/v2/swagger.json", "v2");
   });
 }
 
