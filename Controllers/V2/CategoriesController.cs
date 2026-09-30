@@ -42,7 +42,7 @@ namespace ApiEcommerce.Controllers.V2
     }
 
     [AllowAnonymous]
-    [HttpGet]
+    [HttpGet("OrderById")]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status200OK)]
     // [EnableCors(PolicyNames.AllowSpecificOrigin)]
