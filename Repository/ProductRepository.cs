@@ -56,7 +56,7 @@ public class ProductRepository : IProductRepository
     {
       return null;
     }
-    return _db.Products.Include(p => p.Category).FirstOrDefault(p => p.ProductId == id);
+    return _db.Products.AsNoTracking().Include(p => p.Category).FirstOrDefault(p => p.ProductId == id);
   }
 
   public ICollection<Product> GetProducts()

@@ -486,3 +486,6 @@ $RECYCLE.BIN/
 # Imágenes subidas de productos (mantener carpeta)
 wwwroot/ProductsImages/*
 !wwwroot/ProductsImages/.gitkeep
+
+# Cache generado por el IDE
+*.lscache
