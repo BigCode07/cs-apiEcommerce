@@ -1,13 +1,15 @@
 using System.Text;
 using ApiEcommerce.Constants;
+using ApiEcommerce.Models;
 using ApiEcommerce.Repository;
 using ApiEcommerce.Repository.IRepository;
 using Asp.Versioning;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using Microsoft.VisualBasic;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,6 +27,12 @@ builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddAutoMapper(cfg => cfg.AddMaps(typeof(Program).Assembly));
+
+builder.Services.AddIdentity<ApplicationUser,IdentityRole>()
+.AddEntityFrameworkStores<ApplicationDbContext>()
+.AddDefaultTokenProviders();
+
+
 var secretKey = builder.Configuration.GetValue<string>("ApiSettings:SecretKey");
 if (string.IsNullOrEmpty(secretKey))
 {
@@ -164,6 +172,8 @@ if (app.Environment.IsDevelopment())
     options.SwaggerEndpoint("/swagger/v2/swagger.json","v2");
   });
 }
+
+app.UseStaticFiles();
 
 app.UseHttpsRedirection();
 
