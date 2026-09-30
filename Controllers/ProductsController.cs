@@ -165,7 +165,8 @@ namespace ApiEcommerce.Controllers
       {
         return BadRequest(ModelState);
       }
-      if (!_productRepository.ProductExists(productId))
+      var existingProduct = _productRepository.GetProduct(productId);
+      if (existingProduct == null)
       {
         ModelState.AddModelError("CustomError", "El producto no existe");
         return BadRequest(ModelState);
@@ -178,20 +179,27 @@ namespace ApiEcommerce.Controllers
       var product = _mapper.Map<Product>(updateProductDto);
       product.ProductId = productId;
 
-      // Agregando imagen
+      // Conservar la imagen actual; solo se reemplaza si llega una nueva
+      product.ImgUrl = existingProduct.ImgUrl;
+      product.ImgUrlLocal = existingProduct.ImgUrlLocal;
       if (updateProductDto.Image != null)
       {
         UpdloadProductImage(updateProductDto, product);
-      }
-      else
-      {
-        product.ImgUrl = "https://placehold.co/300x300";
       }
 
       if (!_productRepository.UpdateProduct(product))
       {
         ModelState.AddModelError("CustomError", $"Algo salió mal al actualizar el registro {product.Name}");
         return StatusCode(500, ModelState);
+      }
+
+      // Eliminar la imagen anterior del disco si fue reemplazada
+      if (updateProductDto.Image != null
+        && !string.IsNullOrEmpty(existingProduct.ImgUrlLocal)
+        && existingProduct.ImgUrlLocal != product.ImgUrlLocal
+        && System.IO.File.Exists(existingProduct.ImgUrlLocal))
+      {
+        System.IO.File.Delete(existingProduct.ImgUrlLocal);
       }
       return NoContent();
     }
